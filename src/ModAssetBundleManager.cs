@@ -64,7 +64,7 @@ namespace AssetLoader
 
             ByteReader byteReader = new ByteReader(textAsset);
             string[] languages = Trim(byteReader.ReadCSV().ToArray());
-            string[] knownLanguages = Localization.knownLanguages;
+            string[] knownLanguages = Localization.GetLanguages().ToArray();
 
             while (true)
             {
@@ -88,13 +88,13 @@ namespace AssetLoader
                 }
 
                 var key = values[0];
-                if (Localization.dictionary.ContainsKey(key))
+                if (!Localization.s_CurrentLanguageStringTable.DoesKeyExist(key))
                 {
-                    Localization.dictionary[key] = translations;
+                    Localization.s_CurrentLanguageStringTable.AddEntryForKey(key);
                 }
-                else
+                for(int j = 0; j < translations.Length; j++)
                 {
-                    Localization.dictionary.Add(key, translations);
+                    Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations [j];
                 }
             }
         }
@@ -117,7 +117,7 @@ namespace AssetLoader
 
             Log("Processing asset '{0}' as UIAtlas.", asset.name);
 
-            BetterList<string> sprites = uiAtlas.GetListOfSprites();
+            string[] sprites = uiAtlas.GetListOfSprites().ToArray();
             foreach (var eachSprite in sprites)
             {
                 if (knownSpriteAtlases.ContainsKey(eachSprite))

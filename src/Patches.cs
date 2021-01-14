@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using MelonLoader;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -38,7 +39,7 @@ namespace AssetLoader
         }
     }
 
-    [HarmonyPatch(typeof(GameAudioManager), "LoadSoundBanks")]
+    [HarmonyPatch(typeof(GameAudioManager), "Start")]
     internal class GameAudioManager_LoadSoundBanksPath
     {
         internal static void Postfix()
@@ -49,37 +50,39 @@ namespace AssetLoader
 
     // Hinterland load assets by calling Resources.Load which ignores external AssetBundles
     // so we need to patch Resources.Load to redirect specific calls to load from the AssetBundle instead
-    [HarmonyPatch(typeof(Resources), "Load", new Type[] { typeof(string) })]
-    internal class Resources_Load
-    {
-        internal static bool Prefix(string path, ref UnityEngine.Object __result)
-        {
-            if (!ModAssetBundleManager.IsKnownAsset(path))
-            {
-                return true;
-            }
+    //[HarmonyPatch(typeof(Resources), "Load", new Type[] { typeof(string) })]
+    //internal class Resources_Load
+    //{
+    //    internal static bool Prefix(string path, ref UnityEngine.Object __result)
+    //    {
+    //        if (!ModAssetBundleManager.IsKnownAsset(path))
+    //        {
+    //            return true;
+    //        }
 
-            __result = ModAssetBundleManager.LoadAsset(path);
-            return false;
-        }
-    }
+    //        __result = ModAssetBundleManager.LoadAsset(path);
+    //        return false;
+    //    }
+    //}
 
-    internal class SaveAtlas : MonoBehaviour
+    public class SaveAtlas : MonoBehaviour
     {
         public UIAtlas original;
+
+        public SaveAtlas(IntPtr intPtr) : base(intPtr) { }
     }
 
-    [HarmonyPatch(typeof(UISprite), "set_spriteName")]
+    [HarmonyPatch(typeof(UISprite), "SetAtlasSprite")]
     internal class UISprite_set_spriteName
     {
-        internal static void Postfix(UISprite __instance, string value)
+        internal static void Postfix(UISprite __instance)
         {
-            UIAtlas atlas = AssetUtils.GetRequiredAtlas(__instance, value);
+            UIAtlas atlas = AssetUtils.GetRequiredAtlas(__instance, __instance.mSpriteName);
             if (__instance.atlas == atlas)
             {
                 return;
             }
-
+            
             AssetUtils.SaveOriginalAtlas(__instance);
             __instance.atlas = atlas;
         }

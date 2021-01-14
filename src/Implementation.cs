@@ -1,27 +1,28 @@
 ﻿using UnityEngine;
 using System.Reflection;
+using MelonLoader;
 
 namespace AssetLoader
 {
-    public class Implementation
+    public class Implementation : MelonMod
     {
         private const string NAME = "AssetLoader";
 
-        public static void OnLoad()
+        public override void OnApplicationStart()
         {
-            AssemblyName assemblyName = Assembly.GetExecutingAssembly().GetName();
-            Log("Version " + assemblyName.Version);
+            Debug.Log($"[{Info.Name}] Version {Info.Version} loaded!");
+            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<SaveAtlas>();
         }
 
         internal static void Log(string message)
         {
-            Debug.LogFormat("[" + NAME + "] {0}", message);
+            Debug.Log("[" + NAME + "]: " + message);
         }
 
         internal static void Log(string message, params object[] parameters)
         {
             string preformattedMessage = string.Format("[" + NAME + "] {0}", message);
-            Debug.LogFormat(preformattedMessage, parameters);
+            Debug.Log(preformattedMessage); //, parameters);
         }
     }
 }
