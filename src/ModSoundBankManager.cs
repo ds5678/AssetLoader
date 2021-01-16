@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-
 using static AssetLoader.Implementation;
 
 namespace AssetLoader
@@ -17,7 +16,7 @@ namespace AssetLoader
 
         public static void RegisterSoundBank(string relativePath)
         {
-            string modDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string modDirectory = Implementation.getModsFolderPath();
             string soundBankPath = Path.Combine(modDirectory, relativePath);
             if (!File.Exists(soundBankPath))
             {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Reflection;
 using MelonLoader;
+using System.IO;
 
 namespace AssetLoader
 {
@@ -23,6 +24,11 @@ namespace AssetLoader
         {
             string preformattedMessage = string.Format("[" + NAME + "] {0}", message);
             Debug.Log(preformattedMessage); //, parameters);
+        }
+
+        internal static string getModsFolderPath()
+        {
+            return Path.GetFullPath(typeof(MelonMod).Assembly.Location + @"\..\..\Mods");
         }
     }
 }

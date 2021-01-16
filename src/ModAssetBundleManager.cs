@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using MelonLoader;
 
 using static AssetLoader.Implementation;
 
@@ -141,7 +140,7 @@ namespace AssetLoader
                 return;
             }
 
-            string modDirectory = Path.GetFullPath(typeof(MelonMod).Assembly.Location + @"\..\..\Mods");
+            string modDirectory = Implementation.getModsFolderPath();
             string fullPath = Path.Combine(modDirectory, relativePath);
 
             if (!File.Exists(fullPath))
