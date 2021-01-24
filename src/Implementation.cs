@@ -23,7 +23,7 @@ namespace AssetLoader
         internal static void Log(string message, params object[] parameters)
         {
             string preformattedMessage = string.Format("[" + NAME + "] {0}", message);
-            Debug.Log(preformattedMessage); //, parameters);
+            Debug.Log(string.Format(preformattedMessage,parameters));
         }
 
         internal static string getModsFolderPath()

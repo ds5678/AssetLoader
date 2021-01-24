@@ -49,6 +49,7 @@ namespace AssetLoader
         private static void LoadSoundBank(string soundBankPath)
         {
             Log("Loading mod sound bank from '{0}'.", soundBankPath);
+            Log(soundBankPath);
             byte[] data = File.ReadAllBytes(soundBankPath);
 
             // allocate memory and copy file contents to aligned address
@@ -60,7 +61,9 @@ namespace AssetLoader
             var result = AkSoundEngine.LoadBank(aligned, (uint)data.Length, out bankID);
             if (result != AKRESULT.AK_Success)
             {
-                Log("Failed to load sound bank from '{0}'. Result was {1}.", soundBankPath, result);
+                Log("Failed to load sound bank from:");
+                Log(soundBankPath);
+                Log("Result was {0}.", result);
                 Marshal.FreeHGlobal(allocated);
             }
         }
