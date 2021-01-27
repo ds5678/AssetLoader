@@ -22,6 +22,8 @@ namespace AssetLoader
         private static Dictionary<string, string> knownAssetMappedNames = new Dictionary<string, string>();
         private static Dictionary<string, AssetBundle> knownAssetNames = new Dictionary<string, AssetBundle>();
         private static Dictionary<string, UIAtlas> knownSpriteAtlases = new Dictionary<string, UIAtlas>();
+        internal static List<string> localizationWaitlistBundles = new List<string>(0);
+        internal static List<string> localizationWaitlistAssets = new List<string>(0);
 
         public static AssetBundle GetAssetBundle(string relativePath)
         {
@@ -53,7 +55,7 @@ namespace AssetLoader
 
         public static void LoadLocalization(Object asset)
         {
-            TextAsset textAsset = asset as TextAsset;
+            TextAsset textAsset = asset.Cast<TextAsset>();
             if (textAsset == null)
             {
                 Log("Asset called '{0}' is not a TextAsset as expected.", asset.name);
@@ -64,6 +66,14 @@ namespace AssetLoader
 
             ByteReader byteReader = new ByteReader(textAsset);
             string[] languages = Trim(byteReader.ReadCSV().ToArray());
+            //Implementation.Log("s_language");
+            //Implementation.Log(Localization.s_Language);
+            //Implementation.Log("s_LanguageIndex");
+            //Implementation.Log(Localization.s_LanguageIndex.ToString());
+            //Implementation.Log("s_CurrentLanguageStringTable");
+            //Implementation.Log(Localization.s_CurrentLanguageStringTable.ToString());
+            //Implementation.Log("IsInitialized");
+            //Implementation.Log(Localization.IsInitialized().ToString());
             string[] knownLanguages = Localization.GetLanguages().ToArray();
 
             while (true)
@@ -236,8 +246,17 @@ namespace AssetLoader
 
                 if (assetName == ASSET_NAME_LOCALIZATION)
                 {
-                    Object asset = assetBundle.LoadAsset(eachAssetName);
-                    LoadLocalization(asset);
+                    if (Localization.IsInitialized())
+                    {
+                        Object asset = assetBundle.LoadAsset(eachAssetName);
+                        LoadLocalization(asset);
+                    }
+                    else
+                    {
+                        Implementation.Log("Localization not initialized. Adding asset name to waitlist.");
+                        localizationWaitlistAssets.Add(eachAssetName);
+                        localizationWaitlistBundles.Add(relativePath);
+                    }
                     continue;
                 }
 

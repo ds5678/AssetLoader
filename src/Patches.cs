@@ -65,7 +65,7 @@ namespace AssetLoader
                 
             }
             //AccessTools.Method(typeof(Resources)., "Load", new Type[] { typeof(string) });
-            
+            Implementation.Log("Resources.Load not found for patch.");
             return null;
         }
         internal static bool Prefix(string path, ref UnityEngine.Object __result)
@@ -74,9 +74,32 @@ namespace AssetLoader
             {
                 return true;
             }
-
+            //Implementation.Log("Resources.Load is loading '{0}'", path);
             __result = ModAssetBundleManager.LoadAsset(path);
+            if (__result == null)
+            {
+                Implementation.Log("Resources.Load failed to load the external asset");
+            }
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(GameManager),"Update")]
+    internal class LoadWaitingLocalizations
+    {
+        private static void Postfix()
+        {
+            if(Localization.IsInitialized() && ModAssetBundleManager.localizationWaitlistAssets.Count > 0)
+            {
+                Implementation.Log("Loading Waitlisted Localization Assets");
+                for(int i = 0; i < ModAssetBundleManager.localizationWaitlistAssets.Count; i++)
+                {
+                    AssetBundle assetBundle = ModAssetBundleManager.GetAssetBundle(ModAssetBundleManager.localizationWaitlistBundles[i]);
+                    ModAssetBundleManager.LoadLocalization( assetBundle.LoadAsset(ModAssetBundleManager.localizationWaitlistAssets[i]) );
+                }
+                ModAssetBundleManager.localizationWaitlistAssets = new List<string>(0);
+                ModAssetBundleManager.localizationWaitlistBundles = new List<string>(0);
+            }
         }
     }
 
