@@ -168,7 +168,7 @@ namespace AssetLoader
             return result;
         }
 
-        private static string getAssetMappedName(string assetPath, string assetName)
+        public static string getAssetMappedName(string assetPath, string assetName)
         {
             if (assetName.StartsWith(ASSET_NAME_PREFIX_GEAR) && assetPath.EndsWith(ASSET_PATH_SUFFIX_PREFAB))
             {
@@ -188,11 +188,17 @@ namespace AssetLoader
             return result;
         }
 
-        private static string GetAssetName(string assetPath)
+        public static string GetAssetName(string assetPath)
         {
             string result = assetPath;
 
             int index = assetPath.LastIndexOf('/');
+            if (index != -1)
+            {
+                result = result.Substring(index + 1);
+            }
+
+            index = assetPath.LastIndexOf('\\');
             if (index != -1)
             {
                 result = result.Substring(index + 1);
@@ -207,7 +213,7 @@ namespace AssetLoader
             return result;
         }
 
-        private static string getFullAssetName(string name)
+        public static string getFullAssetName(string name)
         {
             string lowerCaseName = name.ToLowerInvariant();
             if (knownAssetNames.ContainsKey(lowerCaseName))
