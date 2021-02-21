@@ -17,15 +17,22 @@ namespace AssetLoader
 
         internal static void Log(string message)
         {
-            //Debug.Log("[" + NAME + "]: " + message);
             MelonLogger.Log(message);
         }
 
         internal static void Log(string message, params object[] parameters)
         {
-            //string preformattedMessage = string.Format("[" + NAME + "] {0}", message);
-            //Log(string.Format(preformattedMessage, parameters));
             Log(string.Format(message, parameters));
+        }
+
+        internal static void LogWarning(string message)
+        {
+            MelonLogger.LogWarning(message);
+        }
+
+        internal static void LogWarning(string message, params object[] parameters)
+        {
+            LogWarning(string.Format(message, parameters));
         }
 
         internal static string getModsFolderPath()

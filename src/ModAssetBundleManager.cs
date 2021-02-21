@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,8 +23,6 @@ namespace AssetLoader
         private static Dictionary<string, string> knownAssetMappedNames = new Dictionary<string, string>();
         private static Dictionary<string, AssetBundle> knownAssetNames = new Dictionary<string, AssetBundle>();
         private static Dictionary<string, UIAtlas> knownSpriteAtlases = new Dictionary<string, UIAtlas>();
-        internal static List<string> localizationWaitlistBundles = new List<string>(0);
-        internal static List<string> localizationWaitlistAssets = new List<string>(0);
 
         public static AssetBundle GetAssetBundle(string relativePath)
         {
@@ -53,61 +52,7 @@ namespace AssetLoader
             throw new System.Exception("Unknown asset " + name + ". Did you forget to register an AssetBundle?");
         }
 
-        public static void LoadLocalization(Object asset)
-        {
-            TextAsset textAsset = asset.Cast<TextAsset>();
-            if (textAsset == null)
-            {
-                Log("Asset called '{0}' is not a TextAsset as expected.", asset.name);
-                return;
-            }
-
-            Log("Processing asset '{0}' as localization.", asset.name);
-
-            ByteReader byteReader = new ByteReader(textAsset);
-            string[] languages = Trim(byteReader.ReadCSV().ToArray());
-            //Implementation.Log("s_language");
-            //Implementation.Log(Localization.s_Language);
-            //Implementation.Log("s_LanguageIndex");
-            //Implementation.Log(Localization.s_LanguageIndex.ToString());
-            //Implementation.Log("s_CurrentLanguageStringTable");
-            //Implementation.Log(Localization.s_CurrentLanguageStringTable.ToString());
-            //Implementation.Log("IsInitialized");
-            //Implementation.Log(Localization.IsInitialized().ToString());
-            string[] knownLanguages = Localization.GetLanguages().ToArray();
-
-            while (true)
-            {
-                BetterList<string> values = byteReader.ReadCSV();
-                if (values == null)
-                {
-                    break;
-                }
-
-                string[] translations = new string[knownLanguages.Length];
-                for (int i = 0; i < knownLanguages.Length; i++)
-                {
-                    string language = knownLanguages[i];
-                    int index = System.Array.IndexOf(languages, language);
-                    if (index == -1)
-                    {
-                        continue;
-                    }
-
-                    translations[i] = values[index].Trim();
-                }
-
-                var key = values[0];
-                if (!Localization.s_CurrentLanguageStringTable.DoesKeyExist(key))
-                {
-                    Localization.s_CurrentLanguageStringTable.AddEntryForKey(key);
-                }
-                for(int j = 0; j < translations.Length; j++)
-                {
-                    Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations [j];
-                }
-            }
-        }
+        
 
         public static void LoadUiAtlas(Object asset)
         {
@@ -236,7 +181,7 @@ namespace AssetLoader
             AssetBundle assetBundle = AssetBundle.LoadFromFile(fullPath);
             if (!assetBundle)
             {
-                throw new System.Exception("Could not load AssetBundle from '" + fullPath + "'. Make sure the file was created with the correct version of Unity (should be 2018.2.x).");
+                throw new System.Exception("Could not load AssetBundle from '" + fullPath + "'. Make sure the file was created with the correct version of Unity (should be 2019.4.3).");
             }
 
             knownAssetBundles.Add(relativePath, assetBundle);
@@ -255,13 +200,24 @@ namespace AssetLoader
                     if (Localization.IsInitialized())
                     {
                         Object asset = assetBundle.LoadAsset(eachAssetName);
-                        LoadLocalization(asset);
+                        if (eachAssetName.ToLower().EndsWith("json"))
+                        {
+                            LocalizationManager.LoadJSONLocalization(asset);
+                        }
+                        else if (eachAssetName.ToLower().EndsWith("csv"))
+                        {
+                            LocalizationManager.LoadCSVLocalization(asset);
+                        }
+                        else
+                        {
+                            Implementation.LogWarning("Found localization '{0}' that could not be loaded.",eachAssetName);
+                        }
                     }
                     else
                     {
                         Implementation.Log("Localization not initialized. Adding asset name to waitlist.");
-                        localizationWaitlistAssets.Add(eachAssetName);
-                        localizationWaitlistBundles.Add(relativePath);
+                        LocalizationManager.localizationWaitlistAssets.Add(eachAssetName);
+                        LocalizationManager.localizationWaitlistBundles.Add(relativePath);
                     }
                     continue;
                 }
@@ -312,7 +268,7 @@ namespace AssetLoader
             return result;
         }
 
-        private static string[] Trim(string[] values)
+        public static string[] Trim(string[] values)
         {
             string[] result = new string[values.Length];
 

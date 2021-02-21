@@ -35,6 +35,7 @@
   <ItemGroup>
     <Compile Include="src\AssetUtils.cs" />
     <Compile Include="src\Implementation.cs" />
+    <Compile Include="src\LocalizationManager.cs" />
     <Compile Include="src\ModAssetBundleManager.cs" />
     <Compile Include="src\ModSoundBankManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

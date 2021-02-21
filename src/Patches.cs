@@ -48,7 +48,7 @@ namespace AssetLoader
         }
     }
 
-    // Hinterland load assets by calling Resources.Load which ignores external AssetBundles
+    // Hinterland loads assets by calling Resources.Load which ignores external AssetBundles
     // so we need to patch Resources.Load to redirect specific calls to load from the AssetBundle instead
     [HarmonyPatch]
     internal class Resources_Load
@@ -72,6 +72,7 @@ namespace AssetLoader
         {
             if (!ModAssetBundleManager.IsKnownAsset(path))
             {
+                //Implementation.Log(path);
                 return true;
             }
             //Implementation.Log("Resources.Load is loading '{0}'", path);
@@ -89,16 +90,9 @@ namespace AssetLoader
     {
         private static void Postfix()
         {
-            if(Localization.IsInitialized() && ModAssetBundleManager.localizationWaitlistAssets.Count > 0)
+            if( LocalizationManager.localizationWaitlistAssets.Count > 0 && Localization.IsInitialized())
             {
-                Implementation.Log("Loading Waitlisted Localization Assets");
-                for(int i = 0; i < ModAssetBundleManager.localizationWaitlistAssets.Count; i++)
-                {
-                    AssetBundle assetBundle = ModAssetBundleManager.GetAssetBundle(ModAssetBundleManager.localizationWaitlistBundles[i]);
-                    ModAssetBundleManager.LoadLocalization( assetBundle.LoadAsset(ModAssetBundleManager.localizationWaitlistAssets[i]) );
-                }
-                ModAssetBundleManager.localizationWaitlistAssets = new List<string>(0);
-                ModAssetBundleManager.localizationWaitlistBundles = new List<string>(0);
+                LocalizationManager.LoadPendingAssets();
             }
         }
     }
