@@ -23,6 +23,7 @@ namespace AssetLoader
         private static Dictionary<string, string> knownAssetMappedNames = new Dictionary<string, string>();
         private static Dictionary<string, AssetBundle> knownAssetNames = new Dictionary<string, AssetBundle>();
         private static Dictionary<string, UIAtlas> knownSpriteAtlases = new Dictionary<string, UIAtlas>();
+        internal static bool loadingFromExternalBundle = false;
 
         public static AssetBundle GetAssetBundle(string relativePath)
         {
@@ -46,7 +47,10 @@ namespace AssetLoader
 
             if (knownAssetNames.TryGetValue(fullAssetName, out AssetBundle assetBundle))
             {
-                return assetBundle.LoadAsset(fullAssetName);
+                loadingFromExternalBundle = true;
+                UnityEngine.Object result = assetBundle.LoadAsset(fullAssetName);
+                loadingFromExternalBundle = false;
+                return result;
             }
 
             throw new System.Exception("Unknown asset " + name + ". Did you forget to register an AssetBundle?");

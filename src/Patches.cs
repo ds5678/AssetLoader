@@ -7,38 +7,6 @@ using UnityEngine;
 
 namespace AssetLoader
 {
-    [HarmonyPatch()]
-    internal class DefaultAssetBundleRef_LoadAsset_Texture2D
-    {
-        internal static bool Prefix(string name, ref Texture2D __result)
-        {
-            if (!ModAssetBundleManager.IsKnownAsset(name))
-            {
-                return true;
-            }
-
-            __result = ModAssetBundleManager.LoadAsset(name) as Texture2D;
-            return __result == null;
-        }
-
-        internal static MethodBase TargetMethod()
-        {
-            MethodInfo[] methods = typeof(DefaultAssetBundleRef).GetMethods();
-            foreach (MethodInfo eachMethod in methods)
-            {
-                if (eachMethod.Name == "LoadAsset" && eachMethod.GetGenericArguments().Length == 1)
-                {
-                    return eachMethod.MakeGenericMethod(typeof(Texture2D));
-                }
-            }
-
-            Debug.LogWarning("Could not find target method for patch DefaultAssetBundleRef_LoadAsset_Texture2D.");
-
-            // fallback is our own method, so harmony won't fail during load
-            return typeof(DefaultAssetBundleRef_LoadAsset_Texture2D).GetMethod("Prefix");
-        }
-    }
-
     [HarmonyPatch(typeof(GameAudioManager), "Start")]
     internal class GameAudioManager_LoadSoundBanksPath
     {
@@ -64,7 +32,6 @@ namespace AssetLoader
                 }
                 
             }
-            //AccessTools.Method(typeof(Resources)., "Load", new Type[] { typeof(string) });
             Implementation.Log("Resources.Load not found for patch.");
             return null;
         }
@@ -84,6 +51,54 @@ namespace AssetLoader
             return false;
         }
     }
+
+    //Hinterland stores many of its assets in asset bundles
+    //This allows us to enable external asset loading in key locations
+    //For example, paperdoll textures are loaded from asset bundles
+    [HarmonyPatch]
+    internal class AssetBundle_LoadAsset
+    {
+        static MethodBase TargetMethod()
+        {
+            MethodInfo[] methods = typeof(UnityEngine.AssetBundle).GetMethods();
+            foreach (MethodInfo m in methods)
+            {
+                if (m.Name == "LoadAsset" && !m.IsGenericMethod && m.GetParameters().Length == 2)
+                {
+                    //Implementation.Log("Found it");
+                    return m;
+                }
+
+            }
+            Implementation.Log("AssetBundle.LoadAsset not found for patch.");
+            return null;
+        }
+        private static bool Prefix(string name, ref UnityEngine.Object __result)
+        {
+            //Implementation.Log("AssetBundle.Load: '{0}'", name);
+            if (ModAssetBundleManager.loadingFromExternalBundle || !ModAssetBundleManager.IsKnownAsset(name))
+            {
+                //Implementation.Log("AssetBundle.Load skipping '{0}'", name);
+                return true;
+            }
+            //Implementation.Log("AssetBundle.Load loading '{0}'", name);
+            __result = ModAssetBundleManager.LoadAsset(name);
+            if (__result == null)
+            {
+                Implementation.LogWarning("AssetBundle.LoadAsset failed to load the external asset '{0}'",name);
+            }
+            return false;
+        }
+    }
+
+    /*[HarmonyPatch(typeof(AssetBundle), "Contains")]
+    internal class UnityEngine_AssetBundle_Contains
+    {
+        private static void Postfix()
+        {
+            Implementation.Log("Working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+    }*/
 
     [HarmonyPatch(typeof(GameManager),"Update")]
     internal class LoadWaitingLocalizations

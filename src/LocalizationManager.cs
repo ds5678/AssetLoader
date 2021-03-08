@@ -79,7 +79,10 @@ namespace AssetLoader
             }
             for (int j = 0; j < translations.Length; j++)
             {
-                Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations[j];
+                if (!string.IsNullOrEmpty(translations[j]))
+                {
+                    Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations[j];
+                }
             }
         }
 
@@ -126,7 +129,10 @@ namespace AssetLoader
                 }
                 for (int j = 0; j < translations.Length; j++)
                 {
-                    Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations[j];
+                    if (!string.IsNullOrEmpty(translations[j]))
+                    {
+                        Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations[j];
+                    }
                 }
             }
         }
