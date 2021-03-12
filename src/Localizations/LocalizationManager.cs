@@ -8,7 +8,32 @@ namespace AssetLoader
     {
         internal static List<string> localizationWaitlistBundles = new List<string>(0);
         internal static List<string> localizationWaitlistAssets = new List<string>(0);
+        internal static Dictionary<string, Dictionary<string, string>> localizationDictionary = new Dictionary<string, Dictionary<string, string>>();
+        public const bool USE_ENGLISH_AS_DEFAULT = true;
 
+        public static bool Exists(string key)
+        {
+            return localizationDictionary.ContainsKey(key);
+        }
+
+        public static bool Exists(string key, string lang)
+        {
+            return localizationDictionary.ContainsKey(key) && localizationDictionary[key].ContainsKey(lang);
+        }
+
+        public static string Get(string key)
+        {
+            string language = "English";
+            if (Localization.IsInitialized()) language = Localization.Language;
+            return GetForLang(key,language);
+        }
+
+        public static string GetForLang(string key, string lang)
+        {
+            if (Exists(key, lang)) return localizationDictionary[key][lang];
+            else return key;
+        }
+        
         public static string GetText(TextAsset textAsset)
         {
             ByteReader byteReader = new ByteReader(textAsset);
@@ -21,6 +46,14 @@ namespace AssetLoader
             return contents;
         }
 
+        internal static void MaybeLoadPendingAssets()
+        {
+            if (localizationWaitlistAssets.Count > 0 && Localization.IsInitialized())
+            {
+                LoadPendingAssets();
+            }
+        }
+        
         internal static void LoadPendingAssets()
         {
             Implementation.Log("Loading Waitlisted Localization Assets");
@@ -32,6 +65,8 @@ namespace AssetLoader
             }
             LocalizationManager.localizationWaitlistAssets = new List<string>(0);
             LocalizationManager.localizationWaitlistBundles = new List<string>(0);
+            //string text = MelonLoader.TinyJSON.JSON.Dump(localizationDictionary, EncodeOptions.PrettyPrint);
+            //MelonLoader.MelonLogger.Log(text);
         }
 
         public static void LoadLocalization(string bundleName, string assetName)
@@ -54,8 +89,9 @@ namespace AssetLoader
 
         public static void LoadLocalization(string localizationID, Dictionary<string, string> translationDictionary, bool useEnglishAsDefault = false)
         {
-            string[] knownLanguages = Localization.GetLanguages().ToArray();
+            string[] knownLanguages = Localization.GetLanguages()?.ToArray();
 
+            if (!Exists(localizationID)) localizationDictionary.Add(localizationID, new Dictionary<string, string>());
 
             string[] translations = new string[knownLanguages.Length];
             for (int i = 0; i < knownLanguages.Length; i++)
@@ -64,24 +100,25 @@ namespace AssetLoader
 
                 if (translationDictionary.ContainsKey(language))
                 {
-                    translations[i] = translationDictionary[language];
+                    if (!localizationDictionary[localizationID].ContainsKey(language)) 
+                    {
+                        localizationDictionary[localizationID].Add(language, translationDictionary[language]);
+                    }
+                    else
+                    {
+                        localizationDictionary[localizationID][language] = translationDictionary[language];
+                    }
                 }
                 else if (useEnglishAsDefault && translationDictionary.ContainsKey("English"))
                 {
-                    translations[i] = translationDictionary["English"];
-                }
-            }
-
-            var key = localizationID;
-            if (!Localization.s_CurrentLanguageStringTable.DoesKeyExist(key))
-            {
-                Localization.s_CurrentLanguageStringTable.AddEntryForKey(key);
-            }
-            for (int j = 0; j < translations.Length; j++)
-            {
-                if (!string.IsNullOrEmpty(translations[j]))
-                {
-                    Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations[j];
+                    if (!localizationDictionary[localizationID].ContainsKey(language))
+                    {
+                        localizationDictionary[localizationID].Add(language, translationDictionary["English"]);
+                    }
+                    else
+                    {
+                        localizationDictionary[localizationID][language] = translationDictionary["English"];
+                    }
                 }
             }
         }
@@ -99,41 +136,28 @@ namespace AssetLoader
 
             ByteReader byteReader = new ByteReader(textAsset);
             string[] languages = ModAssetBundleManager.Trim(byteReader.ReadCSV().ToArray());
-            string[] knownLanguages = Localization.GetLanguages().ToArray();
 
             while (true)
             {
-                BetterList<string> values = byteReader.ReadCSV();
-                if (values == null)
+                string[] values = byteReader.ReadCSV()?.ToArray();
+                if (values == null || languages == null || values.Length == 0 || languages.Length == 0)
                 {
                     break;
                 }
+                
+                string locID = values[0];
+                Dictionary<string, string> locDict = new Dictionary<string, string>();
 
-                string[] translations = new string[knownLanguages.Length];
-                for (int i = 0; i < knownLanguages.Length; i++)
+                int maxIndex = System.Math.Min(values.Length, languages.Length);
+                for (int j = 1; j < maxIndex; j++)
                 {
-                    string language = knownLanguages[i];
-                    int index = System.Array.IndexOf(languages, language);
-                    if (index == -1)
+                    if (!string.IsNullOrEmpty(values[j]) && !string.IsNullOrEmpty(languages[j]))
                     {
-                        continue;
-                    }
-
-                    translations[i] = values[index].Trim();
-                }
-
-                var key = values[0];
-                if (!Localization.s_CurrentLanguageStringTable.DoesKeyExist(key))
-                {
-                    Localization.s_CurrentLanguageStringTable.AddEntryForKey(key);
-                }
-                for (int j = 0; j < translations.Length; j++)
-                {
-                    if (!string.IsNullOrEmpty(translations[j]))
-                    {
-                        Localization.s_CurrentLanguageStringTable.GetEntryFromKey(key).m_Languages[j] = translations[j];
+                        locDict.Add(languages[j], values[j]);
                     }
                 }
+
+                LoadLocalization(locID, locDict, USE_ENGLISH_AS_DEFAULT);
             }
         }
 
@@ -152,7 +176,7 @@ namespace AssetLoader
             {
                 string locID = pair.Key;
                 Dictionary<string, string> locDict = pair.Value.Make<Dictionary<string, string>>();
-                LoadLocalization(locID, locDict, true);
+                LoadLocalization(locID, locDict, USE_ENGLISH_AS_DEFAULT);
             }
         }
 

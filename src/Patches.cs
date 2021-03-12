@@ -100,18 +100,6 @@ namespace AssetLoader
         }
     }*/
 
-    [HarmonyPatch(typeof(GameManager),"Update")]
-    internal class LoadWaitingLocalizations
-    {
-        private static void Postfix()
-        {
-            if( LocalizationManager.localizationWaitlistAssets.Count > 0 && Localization.IsInitialized())
-            {
-                LocalizationManager.LoadPendingAssets();
-            }
-        }
-    }
-
     public class SaveAtlas : MonoBehaviour
     {
         public UIAtlas original;
