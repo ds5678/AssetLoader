@@ -13,6 +13,7 @@ namespace AssetLoader
 
         private static bool DelayLoadingSoundBanks = true;
         private static List<string> pendingPaths = new List<string>();
+        private static List<byte[]> pendingBytes = new List<byte[]>();
 
         public static void RegisterSoundBank(string relativePath)
         {
@@ -27,10 +28,18 @@ namespace AssetLoader
             {
                 Log("Adding sound bank '{0}' to the list of pending sound banks.", relativePath);
                 pendingPaths.Add(soundBankPath);
-                return;
             }
-
-            LoadSoundBank(soundBankPath);
+            else LoadSoundBank(soundBankPath);
+        }
+        public static void RegisterSoundBank(byte[] data)
+        {
+            if (data == null) throw new System.ArgumentNullException("Data for sound bank was null");
+            if (DelayLoadingSoundBanks)
+            {
+                Log("Adding sound bank to the list of pending sound banks.");
+                pendingBytes.Add(data);
+            }
+            else LoadSoundBank(data);
         }
 
         internal static void RegisterPendingSoundBanks()
@@ -42,16 +51,24 @@ namespace AssetLoader
             {
                 LoadSoundBank(eachPendingPath);
             }
-
             pendingPaths.Clear();
+
+            foreach (var eachPendingBytes in pendingBytes)
+            {
+                LoadSoundBank(eachPendingBytes);
+            }
+            pendingBytes.Clear();
         }
 
         private static void LoadSoundBank(string soundBankPath)
         {
-            Log("Loading mod sound bank from '{0}'.", soundBankPath);
-            Log(soundBankPath);
+            //Log("Loading mod sound bank from '{0}'.", soundBankPath);
+            //Log(soundBankPath);
             byte[] data = File.ReadAllBytes(soundBankPath);
-
+            LoadSoundBank(data,soundBankPath);
+        }
+        private static void LoadSoundBank(byte[] data, string soundBankPath = null)
+        {
             // allocate memory and copy file contents to aligned address
             IntPtr allocated = Marshal.AllocHGlobal(data.Length + MEMORY_ALIGNMENT - 1);
             IntPtr aligned = new IntPtr((allocated.ToInt64() + MEMORY_ALIGNMENT - 1) / MEMORY_ALIGNMENT * MEMORY_ALIGNMENT);
@@ -61,8 +78,8 @@ namespace AssetLoader
             var result = AkSoundEngine.LoadBank(aligned, (uint)data.Length, out bankID);
             if (result != AKRESULT.AK_Success)
             {
-                Log("Failed to load sound bank from:");
-                Log(soundBankPath);
+                if (string.IsNullOrEmpty(soundBankPath)) Log("Failed to load sound bank.");
+                else Log("Failed to load sound bank from: '{0}'",soundBankPath);
                 Log("Result was {0}.", result);
                 Marshal.FreeHGlobal(allocated);
             }

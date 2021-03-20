@@ -91,8 +91,13 @@ namespace AssetLoader
             }
         }
 
+        /// <summary>
+        /// Registers an asset bundle with AssetLoader to insert bundled assets into the game
+        /// </summary>
+        /// <param name="relativePath">The relative path within the Mods folder to the asset bundle file</param>
         public static void RegisterAssetBundle(string relativePath)
         {
+            if (string.IsNullOrEmpty(relativePath)) throw new System.ArgumentException("The relative path while registering an asset bundle was null or empty");
             if (knownAssetBundles.ContainsKey(relativePath))
             {
                 Log("AssetBundle '{0}' has already been registered.", relativePath);
@@ -108,6 +113,21 @@ namespace AssetLoader
             }
 
             LoadAssetBundle(relativePath, fullPath);
+        }
+        /// <summary>
+        /// Registers an asset bundle with AssetLoader to insert bundled assets into the game
+        /// </summary>
+        /// <param name="relativePath">The identifier of this asset bundle. Must be unique</param>
+        /// <param name="assetBundle">The AssetBundle instance to be registered</param>
+        public static void RegisterAssetBundle(string relativePath,AssetBundle assetBundle)
+        {
+            if (string.IsNullOrEmpty(relativePath)) throw new System.ArgumentException("The relative path while registering an asset bundle was null or empty");
+            else if (knownAssetBundles.ContainsKey(relativePath))
+            {
+                Log("AssetBundle '{0}' has already been registered.", relativePath);
+            }
+            else if (assetBundle == null) throw new System.ArgumentNullException("Asset bundle '" + relativePath + "' was null");
+            else LoadAssetBundle(relativePath, assetBundle);
         }
 
         internal static UIAtlas GetSpriteAtlas(string spriteName)
@@ -137,6 +157,11 @@ namespace AssetLoader
             return result;
         }
 
+        /// <summary>
+        /// Takes an asset or file path and returns the name of the file without any file extensions
+        /// </summary>
+        /// <param name="assetPath">The path to the file. It can be relative or absolute</param>
+        /// <returns></returns>
         public static string GetAssetName(string assetPath)
         {
             string result = assetPath;
@@ -162,6 +187,11 @@ namespace AssetLoader
             return result;
         }
 
+        /// <summary>
+        /// Retrieves the asset's full name from the dictionary
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string getFullAssetName(string name)
         {
             string lowerCaseName = name.ToLowerInvariant();
@@ -178,16 +208,37 @@ namespace AssetLoader
             return null;
         }
 
-        private static void LoadAssetBundle(string relativePath, string fullPath)
+        /// <summary>
+        /// Gets a file's asset bundle data and returns an AssetBundle instance containing that data
+        /// </summary>
+        /// <param name="fullPath">The entire system file path to the Asset Bundle</param>
+        /// <returns>A loaded instance of the asset bundle from the file</returns>
+        public static AssetBundle GetAssetBundleFromFile(string fullPath)
         {
-            Log("Loading AssetBundle from '{0}'.", fullPath);
-
             AssetBundle assetBundle = AssetBundle.LoadFromFile(fullPath);
             if (!assetBundle)
             {
-                throw new System.Exception("Could not load AssetBundle from '" + fullPath + "'. Make sure the file was created with the correct version of Unity (should be 2019.4.3).");
+                throw new System.Exception("Could not load AssetBundle from '" + fullPath + "'. The asset bundle might have been made with an incorrect version of Unity (should be 2019.4.3).");
             }
+            return assetBundle;
+        }
 
+        /// <summary>
+        /// Loads an asset bundle into the AssetLoader bank where it can be obtain with Resources.Load or AssetBundle.LoadAsset
+        /// </summary>
+        /// <param name="relativePath">The relative path to the asset bundle from within the mods folder</param>
+        /// <param name="fullPath">The absolute to the asset bundle on the machine executing</param>
+        private static void LoadAssetBundle(string relativePath, string fullPath)
+        {
+            LoadAssetBundle(relativePath, GetAssetBundleFromFile(fullPath));
+        }
+        /// <summary>
+        /// Loads an AssetBundle instance into the AssetLoader bank where it can be obtain with Resources.Load or AssetBundle.LoadAsset
+        /// </summary>
+        /// <param name="relativePath">The relative path to the asset bundle, or the id to identify it</param>
+        /// <param name="assetBundle">The AssetBundle instance to be loaded</param>
+        private static void LoadAssetBundle(string relativePath, AssetBundle assetBundle)
+        {
             knownAssetBundles.Add(relativePath, assetBundle);
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -204,11 +255,11 @@ namespace AssetLoader
                     if (Localization.IsInitialized())
                     {
                         Object asset = assetBundle.LoadAsset(eachAssetName);
-                        if (eachAssetName.ToLower().EndsWith("json"))
+                        if (eachAssetName.ToLower().EndsWith(".json"))
                         {
                             LocalizationManager.LoadJSONLocalization(asset);
                         }
-                        else if (eachAssetName.ToLower().EndsWith("csv"))
+                        else if (eachAssetName.ToLower().EndsWith(".csv"))
                         {
                             LocalizationManager.LoadCSVLocalization(asset);
                         }
@@ -254,6 +305,11 @@ namespace AssetLoader
             Log(stringBuilder.ToString().Trim());
         }
 
+        /// <summary>
+        /// Removes the resource prefixes from an asset path
+        /// </summary>
+        /// <param name="assetPath">The path to the asset within the asset bundle</param>
+        /// <returns>A string without any of the resource folder prefixes</returns>
         private static string StripResourceFolder(string assetPath)
         {
             string result = assetPath;
@@ -272,6 +328,11 @@ namespace AssetLoader
             return result;
         }
 
+        /// <summary>
+        /// Returns an array of string variables without any leading or trailing whitespace
+        /// </summary>
+        /// <param name="values">An array of string variables.</param>
+        /// <returns>A new array containing the trimmed values.</returns>
         public static string[] Trim(string[] values)
         {
             string[] result = new string[values.Length];

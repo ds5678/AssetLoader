@@ -132,7 +132,7 @@ namespace AssetLoader
                 return;
             }
 
-            Implementation.Log("Processing asset '{0}' as csv localization.", asset.name);
+            //Implementation.Log("Processing asset '{0}' as csv localization.", asset.name);
 
             ByteReader byteReader = new ByteReader(textAsset);
             string[] languages = ModAssetBundleManager.Trim(byteReader.ReadCSV().ToArray());
@@ -169,7 +169,7 @@ namespace AssetLoader
                 Implementation.LogWarning("Asset called '{0}' is not a TextAsset as expected.", asset.name);
                 return;
             }
-            Implementation.Log("Processing asset '{0}' as json localization.", asset.name);
+            //Implementation.Log("Processing asset '{0}' as json localization.", asset.name);
             string contents = GetText(textAsset);
             ProxyObject dict = JSON.Load(contents) as ProxyObject;
             foreach (var pair in dict)

@@ -19,6 +19,7 @@ namespace AssetLoader
         }
 
         [HarmonyPatch(typeof(Localization), "Get")]
+        [HarmonyPriority(Priority.First)]
         internal class Localization_Get
         {
             private static void Postfix(ref string __result, string key)
@@ -29,6 +30,7 @@ namespace AssetLoader
         }
 
         [HarmonyPatch(typeof(Localization), "GetForFallbackLanguage")]
+        [HarmonyPriority(Priority.First)]
         internal class Localization_GetForFallbackLanguage
         {
             private static void Postfix(ref string __result, string key)
@@ -39,6 +41,7 @@ namespace AssetLoader
         }
 
         [HarmonyPatch(typeof(Localization), "GetForLang")]
+        [HarmonyPriority(Priority.First)]
         internal class Localization_GetForLang
         {
             private static void Postfix(ref string __result, string key, string lang)
@@ -81,6 +84,7 @@ namespace AssetLoader
             {
                 //Implementation.Log("LoadStringTableForLanguage : Postfix : '{0}'", language);
                 LocalizationManager.MaybeLoadPendingAssets();
+                //MelonLoader.MelonLogger.Log(MelonLoader.TinyJSON.JSON.Dump(LocalizationManager.localizationDictionary, MelonLoader.TinyJSON.EncodeOptions.PrettyPrint));
             }
         }
 

@@ -15,25 +15,13 @@ namespace AssetLoader
             UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<SaveAtlas>();
         }
 
-        internal static void Log(string message)
-        {
-            MelonLogger.Log(message);
-        }
+        internal static void Log(string message) => MelonLogger.Log(message);
 
-        internal static void Log(string message, params object[] parameters)
-        {
-            Log(string.Format(message, parameters));
-        }
+        internal static void Log(string message, params object[] parameters) => MelonLogger.Log(message, parameters);
 
-        internal static void LogWarning(string message)
-        {
-            MelonLogger.LogWarning(message);
-        }
+        internal static void LogWarning(string message) => MelonLogger.LogWarning(message);
 
-        internal static void LogWarning(string message, params object[] parameters)
-        {
-            LogWarning(string.Format(message, parameters));
-        }
+        internal static void LogWarning(string message, params object[] parameters) => MelonLogger.LogWarning(message, parameters);
 
         internal static string getModsFolderPath()
         {

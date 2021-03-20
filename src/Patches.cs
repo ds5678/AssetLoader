@@ -91,15 +91,6 @@ namespace AssetLoader
         }
     }
 
-    /*[HarmonyPatch(typeof(AssetBundle), "Contains")]
-    internal class UnityEngine_AssetBundle_Contains
-    {
-        private static void Postfix()
-        {
-            Implementation.Log("Working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        }
-    }*/
-
     public class SaveAtlas : MonoBehaviour
     {
         public UIAtlas original;
