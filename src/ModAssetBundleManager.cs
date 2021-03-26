@@ -162,26 +162,36 @@ namespace AssetLoader
         /// </summary>
         /// <param name="assetPath">The path to the file. It can be relative or absolute</param>
         /// <returns></returns>
-        public static string GetAssetName(string assetPath)
+        public static string GetAssetName(string assetPath) => GetAssetName(assetPath, true);
+        /// <summary>
+        /// Takes an asset or file path and returns the name of the file
+        /// </summary>
+        /// <param name="assetPath">The path to the file. It can be relative or absolute</param>
+        /// <param name="removeFileExtension">Should this remove the file extension from the result?</param>
+        /// <returns></returns>
+        public static string GetAssetName(string assetPath, bool removeFileExtension)
         {
             string result = assetPath;
 
-            int index = assetPath.LastIndexOf('/');
+            int index = System.Math.Max(assetPath.LastIndexOf('/'), assetPath.LastIndexOf('\\'));
             if (index != -1)
             {
                 result = result.Substring(index + 1);
             }
 
-            index = assetPath.LastIndexOf('\\');
-            if (index != -1)
-            {
-                result = result.Substring(index + 1);
-            }
+            //index = assetPath.LastIndexOf('\\');
+            //if (index != -1)
+            //{
+            //    result = result.Substring(index + 1);
+            //}
 
-            index = result.LastIndexOf('.');
-            if (index != -1)
+            if (removeFileExtension)
             {
-                result = result.Substring(0, index);
+                index = result.LastIndexOf('.');
+                if (index != -1)
+                {
+                    result = result.Substring(0, index);
+                }
             }
 
             return result;

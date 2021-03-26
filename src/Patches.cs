@@ -37,6 +37,7 @@ namespace AssetLoader
         }
         internal static bool Prefix(string path, ref UnityEngine.Object __result)
         {
+            //Implementation.Log("Resources.Load is loading '{0}'", path);
             if (!ModAssetBundleManager.IsKnownAsset(path))
             {
                 //Implementation.Log(path);
