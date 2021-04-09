@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -56,7 +55,7 @@ namespace AssetLoader
             throw new System.Exception("Unknown asset " + name + ". Did you forget to register an AssetBundle?");
         }
 
-        
+
 
         public static void LoadUiAtlas(Object asset)
         {
@@ -119,7 +118,7 @@ namespace AssetLoader
         /// </summary>
         /// <param name="relativePath">The identifier of this asset bundle. Must be unique</param>
         /// <param name="assetBundle">The AssetBundle instance to be registered</param>
-        public static void RegisterAssetBundle(string relativePath,AssetBundle assetBundle)
+        public static void RegisterAssetBundle(string relativePath, AssetBundle assetBundle)
         {
             if (string.IsNullOrEmpty(relativePath)) throw new System.ArgumentException("The relative path while registering an asset bundle was null or empty");
             else if (knownAssetBundles.ContainsKey(relativePath))
@@ -275,7 +274,7 @@ namespace AssetLoader
                         }
                         else
                         {
-                            Implementation.LogWarning("Found localization '{0}' that could not be loaded.",eachAssetName);
+                            Implementation.LogWarning("Found localization '{0}' that could not be loaded.", eachAssetName);
                         }
                     }
                     else

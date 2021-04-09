@@ -1,7 +1,6 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using MelonLoader;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using MelonLoader;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
@@ -32,7 +31,7 @@ using MelonLoader;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("4.3.0")]
-[assembly: AssemblyFileVersion("4.3.0")]
-[assembly: MelonInfo(typeof(AssetLoader.Implementation), "AssetLoader", "4.3.0", "Wulf Marius, ds5678")]
+[assembly: AssemblyVersion("4.4.0")]
+[assembly: AssemblyFileVersion("4.4.0")]
+[assembly: MelonInfo(typeof(AssetLoader.Implementation), "AssetLoader", "4.4.0", "Wulf Marius, ds5678")]
 [assembly: MelonGame("Hinterland", "TheLongDark")]

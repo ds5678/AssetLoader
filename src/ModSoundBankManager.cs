@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using static AssetLoader.Implementation;
 
@@ -65,7 +64,7 @@ namespace AssetLoader
             //Log("Loading mod sound bank from '{0}'.", soundBankPath);
             //Log(soundBankPath);
             byte[] data = File.ReadAllBytes(soundBankPath);
-            LoadSoundBank(data,soundBankPath);
+            LoadSoundBank(data, soundBankPath);
         }
         private static void LoadSoundBank(byte[] data, string soundBankPath = null)
         {
@@ -79,7 +78,7 @@ namespace AssetLoader
             if (result != AKRESULT.AK_Success)
             {
                 if (string.IsNullOrEmpty(soundBankPath)) Log("Failed to load sound bank.");
-                else Log("Failed to load sound bank from: '{0}'",soundBankPath);
+                else Log("Failed to load sound bank from: '{0}'", soundBankPath);
                 Log("Result was {0}.", result);
                 Marshal.FreeHGlobal(allocated);
             }

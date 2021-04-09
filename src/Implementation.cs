@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using System.Reflection;
-using MelonLoader;
+﻿using MelonLoader;
 using System.IO;
+using UnityEngine;
 
 namespace AssetLoader
 {
     public class Implementation : MelonMod
     {
-        private const string NAME = "AssetLoader";
+        public const bool LOG_ALL_ASSET_CALLS = false;
 
         public override void OnApplicationStart()
         {

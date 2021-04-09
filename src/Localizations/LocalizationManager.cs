@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using MelonLoader.TinyJSON;
+﻿using MelonLoader.TinyJSON;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace AssetLoader
 {
-    class LocalizationManager
+    static class LocalizationManager
     {
         internal static List<string> localizationWaitlistBundles = new List<string>(0);
         internal static List<string> localizationWaitlistAssets = new List<string>(0);
@@ -13,19 +13,21 @@ namespace AssetLoader
 
         public static bool Exists(string key)
         {
-            return localizationDictionary.ContainsKey(key);
+            if (string.IsNullOrEmpty(key)) return false;
+            else return localizationDictionary.ContainsKey(key);
         }
 
         public static bool Exists(string key, string lang)
         {
-            return localizationDictionary.ContainsKey(key) && localizationDictionary[key].ContainsKey(lang);
+            if (string.IsNullOrEmpty(key)) return false;
+            else return localizationDictionary.ContainsKey(key) && localizationDictionary[key].ContainsKey(lang);
         }
 
         public static string Get(string key)
         {
             string language = "English";
             if (Localization.IsInitialized()) language = Localization.Language;
-            return GetForLang(key,language);
+            return GetForLang(key, language);
         }
 
         public static string GetForLang(string key, string lang)
@@ -33,7 +35,7 @@ namespace AssetLoader
             if (Exists(key, lang)) return localizationDictionary[key][lang];
             else return key;
         }
-        
+
         public static string GetText(TextAsset textAsset)
         {
             ByteReader byteReader = new ByteReader(textAsset);
@@ -53,7 +55,7 @@ namespace AssetLoader
                 LoadPendingAssets();
             }
         }
-        
+
         internal static void LoadPendingAssets()
         {
             Implementation.Log("Loading Waitlisted Localization Assets");
@@ -61,7 +63,7 @@ namespace AssetLoader
             {
                 string bundleName = LocalizationManager.localizationWaitlistBundles[i];
                 string assetName = LocalizationManager.localizationWaitlistAssets[i];
-                LocalizationManager.LoadLocalization(bundleName,assetName);
+                LocalizationManager.LoadLocalization(bundleName, assetName);
             }
             LocalizationManager.localizationWaitlistAssets = new List<string>(0);
             LocalizationManager.localizationWaitlistBundles = new List<string>(0);
@@ -100,7 +102,7 @@ namespace AssetLoader
 
                 if (translationDictionary.ContainsKey(language))
                 {
-                    if (!localizationDictionary[localizationID].ContainsKey(language)) 
+                    if (!localizationDictionary[localizationID].ContainsKey(language))
                     {
                         localizationDictionary[localizationID].Add(language, translationDictionary[language]);
                     }
@@ -144,7 +146,7 @@ namespace AssetLoader
                 {
                     break;
                 }
-                
+
                 string locID = values[0];
                 Dictionary<string, string> locDict = new Dictionary<string, string>();
 

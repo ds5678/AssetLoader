@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Harmony;
+﻿using Harmony;
 
 namespace AssetLoader
 {
@@ -36,7 +31,7 @@ namespace AssetLoader
             private static void Postfix(ref string __result, string key)
             {
                 //Implementation.Log("Get '{0}'", key);
-                if (LocalizationManager.Exists(key, "English")) __result = LocalizationManager.GetForLang(key,"English");
+                if (LocalizationManager.Exists(key, "English")) __result = LocalizationManager.GetForLang(key, "English");
             }
         }
 
